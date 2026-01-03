@@ -210,6 +210,8 @@ figma.ui.onmessage = async (msg) => {
 function extractAndSendText() {
   const selection = figma.currentPage.selection;
 
+  console.log('[Voice & Tone] Selection changed:', selection.length, 'nodes');
+
   if (selection.length === 0) {
     figma.ui.postMessage({
       type: 'no-selection',
@@ -226,11 +228,23 @@ function extractAndSendText() {
 
     if (isPluginCreated || isRecreatedUI) {
       console.log('[Voice & Tone] Skipping analysis of plugin-created container:', node.name);
+      // Send no-selection message so UI clears stale state
+      figma.ui.postMessage({
+        type: 'no-selection',
+        message: 'Plugin-created content (select other layers to analyze)'
+      });
       return;
     }
   }
 
   const textData = extractTextFromNodes(selection);
+
+  console.log('[Voice & Tone] Extracted:', {
+    selectionName: textData.selectionName,
+    textCount: textData.textCount,
+    hasText: !!textData.allText,
+    hasImage: textData.hasImage
+  });
 
   figma.ui.postMessage({
     type: 'text-extracted',
@@ -245,10 +259,14 @@ function extractTextFromNodes(nodes: readonly SceneNode[]): TextData {
   const allText: string[] = [];
   const textNodes: TextNodeData[] = [];
 
-  function traverse(node: SceneNode) {
+  function traverse(node: SceneNode, depth: number = 0) {
+    const indent = '  '.repeat(depth);
+    console.log(`${indent}[Traverse] ${node.type}: "${node.name}"`);
+
     if (node.type === 'TEXT') {
       const textContent = node.characters;
       if (textContent.trim().length > 0) {
+        console.log(`${indent}  → Found text: "${textContent.substring(0, 50)}..."`);
         allText.push(textContent);
         textNodes.push({
           id: node.id,
@@ -262,15 +280,17 @@ function extractTextFromNodes(nodes: readonly SceneNode[]): TextData {
 
     // Recursively traverse children if the node has them
     if ('children' in node) {
+      console.log(`${indent}  → Has ${node.children.length} children`);
       for (const child of node.children) {
-        traverse(child);
+        traverse(child, depth + 1);
       }
     }
   }
 
   // Traverse all selected nodes
+  console.log('[Voice & Tone] Starting traversal of', nodes.length, 'selected nodes');
   for (const node of nodes) {
-    traverse(node);
+    traverse(node, 0);
   }
 
   // Check if selection can be exported as image (for OCR)

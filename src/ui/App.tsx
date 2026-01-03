@@ -190,6 +190,7 @@ function App() {
       } else if (msg.type === 'text-extracted') {
         console.log('Text extracted:', msg.data);
         clearAnalysisState(); // Clear previous selection's analysis state
+        setAnalysis(null); // Clear rule-based analysis for new selection
         setTextData(msg.data);
         setMessage('');
         setAppliedFixes(new Set());
