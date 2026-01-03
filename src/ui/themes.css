@@ -66,6 +66,7 @@
   --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.15);
   --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.15);
   --shadow-overlay: rgba(0, 0, 0, 0.5);
+  --shadow-button-glow: 0 0 20px rgba(59, 130, 246, 0.3);
 
   /* Font Sizes - Normal Scale */
   --font-size-xs: 11px;
@@ -142,6 +143,7 @@
   --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.4);
   --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.4);
   --shadow-overlay: rgba(0, 0, 0, 0.7);
+  --shadow-button-glow: 0 0 20px rgba(59, 130, 246, 0.4);
 }
 
 /* ============================================

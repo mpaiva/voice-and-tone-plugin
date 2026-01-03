@@ -504,7 +504,7 @@
   text-transform: uppercase;
   cursor: pointer;
   transition: 0.5s;
-  box-shadow: 0 0 20px #eee;
+  box-shadow: var(--shadow-button-glow);
   display: block;
 }
 
