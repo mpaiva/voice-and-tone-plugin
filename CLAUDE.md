@@ -71,7 +71,7 @@ src/
 │   ├── services/
 │   │   ├── openai.ts          # AI analysis integration
 │   │   ├── copywriting.ts     # Clear-Co Copy generation
-│   │   ├── ocr.ts             # Tesseract.js integration
+│   │   ├── ocr.ts             # OpenAI Vision OCR
 │   │   └── settings.ts        # Settings management
 │   ├── components/
 │   │   ├── Settings.tsx       # API key configuration
@@ -154,12 +154,19 @@ Key principles are summarized in `src/ui/constants/defaultGuidelines.ts`.
 
 ## OCR Implementation
 
-OCR uses **OpenAI Vision API** (not local Tesseract.js) for text extraction from images.
+OCR uses **OpenAI Vision API** for text extraction from images.
+
+**Why not local OCR?** Figma's Content Security Policy (CSP) prevents loading WASM modules inside web workers, making Tesseract.js incompatible with Figma plugins.
 
 **Requirements:**
-- OpenAI API key configured
-- AI analysis enabled in settings
-- Vision-capable model selected: `gpt-4o`, `gpt-4-turbo`, or `gpt-4-vision-preview`
+- OpenAI API key configured in Settings
+- AI analysis enabled
+- Vision-capable model: `gpt-4o` or `gpt-4o-mini` (recommended)
+
+**Common errors:**
+- **Rate limit (429)**: Wait 1 minute, or check OpenAI billing at platform.openai.com
+- **Invalid key (401)**: Verify API key in Settings
+- **Model doesn't support vision**: Switch to gpt-4o or gpt-4o-mini
 
 Service: `src/ui/services/ocr.ts`
 
