@@ -1,0 +1,185 @@
+/**
+ * Theme and accessibility CSS variables
+ * Defines color schemes for light/dark themes and font size scales
+ */
+
+/* ============================================
+   LIGHT THEME (Default)
+   ============================================ */
+:root {
+  /* Background Colors */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-bg-tertiary: #f8f9fa;
+  --color-bg-code: #f9fafb;
+  --color-bg-hover: #f3f4f6;
+
+  /* Text Colors */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  --color-text-link: #3b82f6;
+  --color-text-muted: #666666;
+
+  /* Border Colors */
+  --color-border-primary: #e5e7eb;
+  --color-border-secondary: #d1d5db;
+  --color-border-tertiary: #e0e0e0;
+
+  /* Success Colors */
+  --color-success: #10b981;
+  --color-success-bg: #f0fdf4;
+  --color-success-border: #10b981;
+  --color-success-text: #047857;
+  --color-success-dark: #059669;
+
+  /* Warning Colors */
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fffbeb;
+  --color-warning-border: #f59e0b;
+  --color-warning-text: #92400e;
+
+  /* Error Colors */
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-error-text: #991b1b;
+  --color-error-dark: #b91c1c;
+
+  /* Info Colors */
+  --color-info: #3b82f6;
+  --color-info-bg: #eff6ff;
+  --color-info-border: #dbeafe;
+  --color-info-text: #1e40af;
+  --color-info-dark: #2563eb;
+
+  /* AI/Purple Colors */
+  --color-ai-primary: #667eea;
+  --color-ai-secondary: #764ba2;
+  --color-ai-border: #667eea;
+  --color-purple: #8b5cf6;
+  --color-purple-dark: #7c3aed;
+  --color-purple-light: #faf5ff;
+  --color-purple-border: #ddd6fe;
+
+  /* Shadows */
+  --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --shadow-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Font Sizes - Normal Scale */
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 36px;
+}
+
+/* ============================================
+   DARK THEME
+   ============================================ */
+[data-theme="dark"] {
+  /* Background Colors */
+  --color-bg-primary: #1a1a1a;
+  --color-bg-secondary: #2d2d2d;
+  --color-bg-tertiary: #3a3a3a;
+  --color-bg-code: #2d2d2d;
+  --color-bg-hover: #404040;
+
+  /* Text Colors */
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #b0b0b0;
+  --color-text-tertiary: #808080;
+  --color-text-link: #6ea8fe;
+  --color-text-muted: #999999;
+
+  /* Border Colors */
+  --color-border-primary: #404040;
+  --color-border-secondary: #4d4d4d;
+  --color-border-tertiary: #4d4d4d;
+
+  /* Success Colors */
+  --color-success: #10b981;
+  --color-success-bg: #1a3a2e;
+  --color-success-border: #2d5f4b;
+  --color-success-text: #6ee7b7;
+  --color-success-dark: #059669;
+
+  /* Warning Colors */
+  --color-warning: #f59e0b;
+  --color-warning-bg: #3a2e1a;
+  --color-warning-border: #5f4b2d;
+  --color-warning-text: #fcd34d;
+
+  /* Error Colors */
+  --color-error: #ef4444;
+  --color-error-bg: #3a1a1a;
+  --color-error-border: #5f2d2d;
+  --color-error-text: #fca5a5;
+  --color-error-dark: #dc2626;
+
+  /* Info Colors */
+  --color-info: #3b82f6;
+  --color-info-bg: #1a2a3a;
+  --color-info-border: #2d4b5f;
+  --color-info-text: #93c5fd;
+  --color-info-dark: #2563eb;
+
+  /* AI/Purple Colors */
+  --color-ai-primary: #8b92f6;
+  --color-ai-secondary: #9c80d2;
+  --color-ai-border: #8b92f6;
+  --color-purple: #a78bfa;
+  --color-purple-dark: #8b5cf6;
+  --color-purple-light: #2d2440;
+  --color-purple-border: #4d3d6d;
+
+  /* Shadows */
+  --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-overlay: rgba(0, 0, 0, 0.7);
+}
+
+/* ============================================
+   LARGE FONT SIZE SCALE
+   ============================================ */
+[data-font-size="large"] {
+  --font-size-xs: 14px;
+  --font-size-sm: 15px;
+  --font-size-base: 16px;
+  --font-size-md: 17px;
+  --font-size-lg: 20px;
+  --font-size-xl: 22px;
+  --font-size-2xl: 25px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 45px;
+}
+
+/* ============================================
+   SMOOTH TRANSITIONS
+   ============================================ */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Disable transitions on theme change for instant switch */
+[data-theme] * {
+  transition: background-color 0s, color 0s, border-color 0s;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+/* Headings use Atkinson Hyperlegible for readability */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Body text and labels use Public Sans */
+body, p, span, label, input, textarea, select, button {
+  font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
