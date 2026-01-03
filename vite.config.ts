@@ -68,8 +68,8 @@ export default defineConfig(({ mode }) => {
             }
           }
 
-          // Copy English trained data
-          const engDataSrc = path.resolve(__dirname, 'node_modules/tesseract.js/dist/eng.traineddata.gz');
+          // Copy English trained data from public/tesseract (bundled locally for CSP)
+          const engDataSrc = path.resolve(__dirname, 'public/tesseract/eng.traineddata.gz');
           if (fs.existsSync(engDataSrc)) {
             fs.copyFileSync(engDataSrc, path.resolve(tesseractDir, 'eng.traineddata.gz'));
             console.log('Copied eng.traineddata.gz to dist/tesseract/');

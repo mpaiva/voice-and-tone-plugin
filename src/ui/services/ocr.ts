@@ -87,22 +87,27 @@ export async function extractTextWithTesseract(
   }
 
   try {
-    const result = await Tesseract.recognize(
-      imageSource,
-      'eng',
-      {
-        logger: (m) => {
-          if (m.status === 'recognizing text') {
-            onProgress?.({
-              status: 'Recognizing text...',
-              progress: 0.3 + (m.progress * 0.6)
-            });
-          } else if (m.status === 'loading language traineddata') {
-            onProgress?.({ status: 'Loading language data...', progress: 0.2 });
-          }
+    // Create worker with local paths to avoid CSP issues in Figma
+    const worker = await Tesseract.createWorker('eng', 1, {
+      workerPath: './tesseract/worker.min.js',
+      corePath: './tesseract/tesseract-core-simd.wasm.js',
+      langPath: './tesseract',
+      logger: (m) => {
+        if (m.status === 'recognizing text') {
+          onProgress?.({
+            status: 'Recognizing text...',
+            progress: 0.3 + (m.progress * 0.6)
+          });
+        } else if (m.status === 'loading language traineddata') {
+          onProgress?.({ status: 'Loading language data...', progress: 0.2 });
+        } else if (m.status === 'loading tesseract core') {
+          onProgress?.({ status: 'Loading OCR engine...', progress: 0.15 });
         }
       }
-    );
+    });
+
+    const result = await worker.recognize(imageSource);
+    await worker.terminate();
 
     const processingTime = Date.now() - startTime;
 
