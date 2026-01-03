@@ -26,7 +26,7 @@ A Figma plugin that analyzes UI text against voice and tone guidelines to ensure
 - Auto-fix suggestions with "Apply fix" buttons
 - OpenAI-powered AI analysis (optional)
 - AI copywriting with rewrite, summarize, and variants
-- OCR text extraction from images via Tesseract.js
+- OCR text extraction from images via OpenAI Vision
 
 ## Getting Started
 
@@ -80,7 +80,6 @@ Please utilize the comprehensive documentation to facilitate your understanding.
 - **Compromise** - NLP for passive voice detection
 - **text-readability** - Readability scoring (Flesch-Kincaid)
 - **@tabler/icons-react** - UI icons
-- **Tesseract.js** - OCR text extraction
 
 ## Guidelines Reference
 
@@ -114,5 +113,6 @@ Key categories:
 - Verify API key has credits
 
 ### OCR not working
-- Verify `dist/tesseract/` directory exists after build
-- Check for CSP errors in console
+- OCR requires OpenAI Vision API (same API key as AI analysis)
+- Select a vision-capable model: `gpt-4o`, `gpt-4-turbo`, or `gpt-4-vision-preview`
+- `gpt-3.5-turbo` does not support vision

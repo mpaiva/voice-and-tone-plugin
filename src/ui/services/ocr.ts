@@ -107,7 +107,11 @@ export async function extractTextFromImage(
     };
   } catch (error) {
     console.error('OCR extraction failed:', error);
-    throw new Error('Failed to extract text from image. Please check your API key and try again.');
+    // Preserve the original error message for better debugging
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to extract text from image.');
   }
 }
 
