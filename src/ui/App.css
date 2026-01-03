@@ -730,16 +730,76 @@
 }
 
 .footer {
-  padding: 12px 20px;
+  padding: 10px 16px;
   background: var(--color-bg-primary);
   border-top: 1px solid var(--color-border-primary);
-  text-align: center;
 }
 
-.footer p {
-  margin: 0;
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-title {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+
+.footer-status {
+  display: flex;
+  align-items: center;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.connected {
+  background: var(--color-success);
+  box-shadow: 0 0 6px var(--color-success);
+}
+
+.status-dot.disconnected {
+  background: var(--color-error);
+}
+
+.status-dot.checking {
+  background: var(--color-warning);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.status-connected {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+}
+
+.status-disconnected {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.status-checking {
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
 }
 
 /* Copywriting Section */

@@ -18,7 +18,7 @@ import {
 import { loadSettings, saveSettings, initSettingsListener } from './services/settings';
 import { analyzeWithAI, estimateCost } from './services/openai';
 import { generateCopy } from './services/copywriting';
-import { extractTextFromImage } from './services/ocr';
+import { extractTextFromImage, validateApiKey, type APIKeyStatus } from './services/ocr';
 import { analyzeUIStructure } from './services/uiAnalysis';
 import { detectElementType } from './analysis/elementDetector';
 
@@ -69,6 +69,10 @@ function App() {
   // Accessibility state
   const [theme, setTheme] = useState<Theme>('light');
   const [fontSize, setFontSize] = useState<FontSize>('normal');
+
+  // API status state
+  const [apiStatus, setApiStatus] = useState<APIKeyStatus>({ valid: false, error: 'Not configured' });
+  const [apiStatusLoading, setApiStatusLoading] = useState(false);
 
   /**
    * Clear all analysis state when selection changes
@@ -128,6 +132,23 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.setAttribute('data-font-size', fontSize);
   }, [theme, fontSize]);
+
+  // Validate API key when settings change
+  useEffect(() => {
+    const checkApiStatus = async () => {
+      if (!settings.enabled || !settings.apiKey) {
+        setApiStatus({ valid: false, error: 'Not configured' });
+        return;
+      }
+
+      setApiStatusLoading(true);
+      const status = await validateApiKey(settings.apiKey);
+      setApiStatus(status);
+      setApiStatusLoading(false);
+    };
+
+    checkApiStatus();
+  }, [settings.apiKey, settings.enabled]);
 
   useEffect(() => {
     // Initialize settings listener
@@ -859,7 +880,27 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>ClearCopy - Voice & tone guideline checker</p>
+        <div className="footer-content">
+          <span className="footer-title">ClearCopy</span>
+          <div className="footer-status">
+            {apiStatusLoading ? (
+              <span className="status-indicator status-checking">
+                <span className="status-dot checking"></span>
+                Checking API...
+              </span>
+            ) : apiStatus.valid ? (
+              <span className="status-indicator status-connected">
+                <span className="status-dot connected"></span>
+                {settings.model}
+              </span>
+            ) : (
+              <span className="status-indicator status-disconnected" title={apiStatus.error}>
+                <span className="status-dot disconnected"></span>
+                {apiStatus.quotaExceeded ? 'Quota exceeded' : apiStatus.error || 'Not connected'}
+              </span>
+            )}
+          </div>
+        </div>
       </footer>
 
       {showSettings && (

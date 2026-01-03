@@ -2,6 +2,56 @@
 
 import type { OpenAISettings } from '../analysis/aiTypes';
 
+export interface APIKeyStatus {
+  valid: boolean;
+  error?: string;
+  quotaExceeded?: boolean;
+}
+
+/**
+ * Validate OpenAI API key by making a lightweight request to /v1/models
+ * This endpoint is free and doesn't consume credits
+ */
+export async function validateApiKey(apiKey: string): Promise<APIKeyStatus> {
+  if (!apiKey || apiKey.trim() === '') {
+    return { valid: false, error: 'API key not configured' };
+  }
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/models', {
+      headers: { 'Authorization': `Bearer ${apiKey}` }
+    });
+
+    if (response.ok) {
+      return { valid: true };
+    }
+
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage = errorData.error?.message || `HTTP ${response.status}`;
+
+    // Check for quota exceeded
+    if (response.status === 429 || errorMessage.toLowerCase().includes('quota')) {
+      return {
+        valid: false,
+        error: 'API quota exceeded. Please check your billing.',
+        quotaExceeded: true
+      };
+    }
+
+    // Check for invalid key
+    if (response.status === 401) {
+      return { valid: false, error: 'Invalid API key' };
+    }
+
+    return { valid: false, error: errorMessage };
+  } catch (error) {
+    return {
+      valid: false,
+      error: error instanceof Error ? error.message : 'Network error'
+    };
+  }
+}
+
 export interface OCRResult {
   text: string;
   confidence: number;
