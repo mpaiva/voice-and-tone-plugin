@@ -910,6 +910,42 @@ function App() {
           onClose={() => setShowSettings(false)}
         />
       )}
+
+      {/* Resize handle */}
+      <div
+        className="resize-handle"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          const startX = e.clientX;
+          const startY = e.clientY;
+          const startWidth = window.innerWidth;
+          const startHeight = window.innerHeight;
+
+          const onMouseMove = (moveEvent: MouseEvent) => {
+            const newWidth = startWidth + (moveEvent.clientX - startX);
+            const newHeight = startHeight + (moveEvent.clientY - startY);
+            parent.postMessage({
+              pluginMessage: {
+                type: 'resize',
+                width: newWidth,
+                height: newHeight
+              }
+            }, '*');
+          };
+
+          const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+          };
+
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+          <path d="M11 11H9V9H11V11ZM11 7H9V5H11V7ZM7 11H5V9H7V11ZM11 3H9V1H11V3ZM7 7H5V5H7V7ZM3 11H1V9H3V11Z" />
+        </svg>
+      </div>
     </div>
   );
 }

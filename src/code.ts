@@ -3,11 +3,12 @@
 
 import { createComponentsFromAnalysis } from './componentGenerator';
 
-// Show the plugin UI
+// Show the plugin UI with resize enabled
 figma.showUI(__html__, {
   width: 400,
   height: 600,
-  title: 'ClearCopy'
+  title: 'ClearCopy',
+  themeColors: true
 });
 
 // Listen for selection changes
@@ -173,6 +174,11 @@ figma.ui.onmessage = async (msg) => {
         error: error instanceof Error ? error.message : 'Failed to apply fix'
       });
     }
+  } else if (msg.type === 'resize') {
+    // Resize the plugin window
+    const width = Math.max(300, Math.min(800, msg.width));
+    const height = Math.max(400, Math.min(1000, msg.height));
+    figma.ui.resize(width, height);
   } else if (msg.type === 'create-components') {
     // Create Figma components from UI analysis
     try {

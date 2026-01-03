@@ -1563,3 +1563,29 @@
   font-size: var(--font-size-base);
   color: var(--color-error-text);
 }
+
+/* Resize Handle */
+.resize-handle {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  z-index: 1000;
+}
+
+.resize-handle:hover {
+  opacity: 1;
+  color: var(--color-text-primary);
+}
+
+.resize-handle svg {
+  pointer-events: none;
+}
