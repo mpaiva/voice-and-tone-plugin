@@ -31,10 +31,11 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       viteSingleFile(),
-      // Move ui.html to dist root
+      // Move ui.html to dist root and copy Tesseract worker files
       {
-        name: 'move-ui-html',
+        name: 'post-build-tasks',
         closeBundle: () => {
+          // Move ui.html to dist root
           const srcPath = path.resolve(__dirname, 'dist/src/ui.html');
           const destPath = path.resolve(__dirname, 'dist/ui.html');
           if (fs.existsSync(srcPath)) {
@@ -44,6 +45,34 @@ export default defineConfig(({ mode }) => {
             } catch (e) {
               // Directory not empty, ignore
             }
+          }
+
+          // Copy Tesseract worker files for local OCR (avoids CSP issues in Figma)
+          const tesseractDir = path.resolve(__dirname, 'dist/tesseract');
+          if (!fs.existsSync(tesseractDir)) {
+            fs.mkdirSync(tesseractDir, { recursive: true });
+          }
+
+          const workerFiles = [
+            'node_modules/tesseract.js/dist/worker.min.js',
+            'node_modules/tesseract.js-core/tesseract-core-simd.wasm.js',
+            'node_modules/tesseract.js-core/tesseract-core-simd-lstm.wasm.js'
+          ];
+
+          for (const file of workerFiles) {
+            const srcFile = path.resolve(__dirname, file);
+            const destFile = path.resolve(tesseractDir, path.basename(file));
+            if (fs.existsSync(srcFile)) {
+              fs.copyFileSync(srcFile, destFile);
+              console.log(`Copied ${path.basename(file)} to dist/tesseract/`);
+            }
+          }
+
+          // Copy English trained data
+          const engDataSrc = path.resolve(__dirname, 'node_modules/tesseract.js/dist/eng.traineddata.gz');
+          if (fs.existsSync(engDataSrc)) {
+            fs.copyFileSync(engDataSrc, path.resolve(tesseractDir, 'eng.traineddata.gz'));
+            console.log('Copied eng.traineddata.gz to dist/tesseract/');
           }
         }
       }

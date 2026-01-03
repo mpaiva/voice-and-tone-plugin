@@ -1,5 +1,6 @@
-// OCR service using OpenAI Vision API for text extraction from images
+// OCR service with OpenAI Vision API (primary) and Tesseract.js (fallback)
 
+import Tesseract from 'tesseract.js';
 import type { OpenAISettings } from '../analysis/aiTypes';
 
 export interface APIKeyStatus {
@@ -57,6 +58,7 @@ export interface OCRResult {
   confidence: number;
   language: string;
   processingTime: number;
+  method: 'openai' | 'tesseract';
 }
 
 export interface OCRProgress {
@@ -65,9 +67,64 @@ export interface OCRProgress {
 }
 
 /**
- * Extract text from an image using OpenAI Vision API
+ * Extract text using Tesseract.js (local, free, no rate limits)
  */
-export async function extractTextFromImage(
+export async function extractTextWithTesseract(
+  imageData: string | Uint8Array,
+  onProgress?: (progress: OCRProgress) => void
+): Promise<OCRResult> {
+  const startTime = Date.now();
+
+  onProgress?.({ status: 'Initializing Tesseract OCR...', progress: 0.1 });
+
+  // Convert Uint8Array to base64 data URL if needed
+  let imageSource: string;
+  if (typeof imageData === 'string') {
+    imageSource = imageData.startsWith('data:') ? imageData : `data:image/png;base64,${imageData}`;
+  } else {
+    const base64 = uint8ArrayToBase64(imageData);
+    imageSource = `data:image/png;base64,${base64}`;
+  }
+
+  try {
+    const result = await Tesseract.recognize(
+      imageSource,
+      'eng',
+      {
+        logger: (m) => {
+          if (m.status === 'recognizing text') {
+            onProgress?.({
+              status: 'Recognizing text...',
+              progress: 0.3 + (m.progress * 0.6)
+            });
+          } else if (m.status === 'loading language traineddata') {
+            onProgress?.({ status: 'Loading language data...', progress: 0.2 });
+          }
+        }
+      }
+    );
+
+    const processingTime = Date.now() - startTime;
+
+    onProgress?.({ status: 'Complete', progress: 1.0 });
+
+    return {
+      text: result.data.text.trim(),
+      confidence: result.data.confidence,
+      language: 'eng',
+      processingTime,
+      method: 'tesseract'
+    };
+  } catch (error) {
+    console.error('Tesseract OCR failed:', error);
+    throw new Error(error instanceof Error ? error.message : 'Tesseract OCR failed');
+  }
+}
+
+/**
+ * Extract text using OpenAI Vision API
+ */
+export async function extractTextWithOpenAI(
   imageData: string | Uint8Array,
   settings: OpenAISettings,
   onProgress?: (progress: OCRProgress) => void
@@ -83,7 +140,7 @@ export async function extractTextFromImage(
   }
 
   // Check if model supports vision
-  const visionModels = ['gpt-4-vision-preview', 'gpt-4-turbo', 'gpt-4o'];
+  const visionModels = ['gpt-4-vision-preview', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini'];
   if (!visionModels.includes(settings.model)) {
     throw new Error(`Model ${settings.model} does not support vision. Please select a vision-capable model (gpt-4o, gpt-4-turbo, or gpt-4-vision-preview) in Settings.`);
   }
@@ -95,74 +152,89 @@ export async function extractTextFromImage(
   if (typeof imageData === 'string') {
     base64Image = imageData;
   } else {
-    // Convert Uint8Array to base64
     base64Image = uint8ArrayToBase64(imageData);
   }
 
   onProgress?.({ status: 'Sending to OpenAI Vision...', progress: 0.3 });
 
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${settings.apiKey}`
-      },
-      body: JSON.stringify({
-        model: settings.model,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Extract all text from this image. Return only the extracted text, preserving the original layout and formatting as much as possible. If there is no text in the image, return an empty response.'
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/png;base64,${base64Image}`
-                }
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${settings.apiKey}`
+    },
+    body: JSON.stringify({
+      model: settings.model,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Extract all text from this image. Return only the extracted text, preserving the original layout and formatting as much as possible. If there is no text in the image, return an empty response.'
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/png;base64,${base64Image}`
               }
-            ]
-          }
-        ],
-        max_tokens: 1000
-      })
-    });
+            }
+          ]
+        }
+      ],
+      max_tokens: 1000
+    })
+  });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'OpenAI Vision API request failed');
-    }
-
-    onProgress?.({ status: 'Processing response...', progress: 0.8 });
-
-    const data = await response.json();
-    const extractedText = data.choices[0].message.content.trim();
-
-    const processingTime = Date.now() - startTime;
-
-    onProgress?.({ status: 'Complete', progress: 1.0 });
-
-    // OpenAI doesn't provide confidence scores like Tesseract, so we'll estimate
-    // based on response quality (non-empty = high confidence)
-    const confidence = extractedText.length > 0 ? 95 : 50;
-
-    return {
-      text: extractedText,
-      confidence,
-      language: 'eng',
-      processingTime
-    };
-  } catch (error) {
-    console.error('OCR extraction failed:', error);
-    // Preserve the original error message for better debugging
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error('Failed to extract text from image.');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error?.message || 'OpenAI Vision API request failed');
   }
+
+  onProgress?.({ status: 'Processing response...', progress: 0.8 });
+
+  const data = await response.json();
+  const extractedText = data.choices[0].message.content.trim();
+
+  const processingTime = Date.now() - startTime;
+
+  onProgress?.({ status: 'Complete', progress: 1.0 });
+
+  return {
+    text: extractedText,
+    confidence: extractedText.length > 0 ? 95 : 50,
+    language: 'eng',
+    processingTime,
+    method: 'openai'
+  };
+}
+
+/**
+ * Extract text from image - tries OpenAI Vision first, falls back to Tesseract
+ */
+export async function extractTextFromImage(
+  imageData: string | Uint8Array,
+  settings: OpenAISettings,
+  onProgress?: (progress: OCRProgress) => void
+): Promise<OCRResult> {
+  // Check if OpenAI is properly configured
+  const openAIAvailable = settings.enabled &&
+    settings.apiKey &&
+    ['gpt-4-vision-preview', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini'].includes(settings.model);
+
+  if (openAIAvailable) {
+    try {
+      // Try OpenAI Vision first
+      return await extractTextWithOpenAI(imageData, settings, onProgress);
+    } catch (error) {
+      console.warn('OpenAI Vision failed, falling back to Tesseract:', error);
+      onProgress?.({ status: 'OpenAI failed, using local OCR...', progress: 0.1 });
+      // Fall through to Tesseract
+    }
+  }
+
+  // Use Tesseract as fallback (or primary if OpenAI not configured)
+  return await extractTextWithTesseract(imageData, onProgress);
 }
 
 /**
@@ -184,14 +256,12 @@ export function validateImageQuality(
   imageData: Uint8Array,
   minSize: number = 100
 ): { valid: boolean; message?: string } {
-  // Basic validation - check if image is too small
   if (imageData.length < minSize) {
     return {
       valid: false,
       message: 'Image is too small. Please use a higher resolution image.'
     };
   }
-
   return { valid: true };
 }
 
@@ -199,23 +269,24 @@ export function validateImageQuality(
  * Estimate OCR processing time based on image size
  */
 export function estimateProcessingTime(imageBytes: number): number {
-  // OpenAI Vision typically takes 2-5 seconds regardless of image size
-  return 3;
+  // Tesseract takes longer than OpenAI for large images
+  if (imageBytes > 1000000) return 10; // > 1MB
+  if (imageBytes > 500000) return 6;   // > 500KB
+  return 4;
 }
 
 /**
- * No initialization needed for OpenAI Vision (kept for API compatibility)
+ * Initialize OCR (pre-load Tesseract if needed)
  */
 export async function initializeOCR(
   onProgress?: (progress: OCRProgress) => void
 ): Promise<void> {
-  // No initialization needed for OpenAI Vision
   onProgress?.({ status: 'Ready', progress: 1.0 });
 }
 
 /**
- * No cleanup needed for OpenAI Vision (kept for API compatibility)
+ * Clean up OCR resources
  */
 export async function terminateOCR(): Promise<void> {
-  // No cleanup needed
+  // Tesseract workers are auto-terminated
 }
