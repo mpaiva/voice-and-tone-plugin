@@ -1,6 +1,7 @@
-// OCR service with OpenAI Vision API (primary) and Tesseract.js (fallback)
+// OCR service using OpenAI Vision API
+// Note: Local OCR (Tesseract.js) is not available in Figma plugins due to CSP
+// restrictions that prevent loading WASM modules inside web workers.
 
-import Tesseract from 'tesseract.js';
 import type { OpenAISettings } from '../analysis/aiTypes';
 
 export interface APIKeyStatus {
@@ -58,7 +59,7 @@ export interface OCRResult {
   confidence: number;
   language: string;
   processingTime: number;
-  method: 'openai' | 'tesseract';
+  method: 'openai';
 }
 
 export interface OCRProgress {
@@ -67,63 +68,15 @@ export interface OCRProgress {
 }
 
 /**
- * Extract text using Tesseract.js (local, free, no rate limits)
+ * Convert Uint8Array to base64 string
  */
-export async function extractTextWithTesseract(
-  imageData: string | Uint8Array,
-  onProgress?: (progress: OCRProgress) => void
-): Promise<OCRResult> {
-  const startTime = Date.now();
-
-  onProgress?.({ status: 'Initializing Tesseract OCR...', progress: 0.1 });
-
-  // Convert Uint8Array to base64 data URL if needed
-  let imageSource: string;
-  if (typeof imageData === 'string') {
-    imageSource = imageData.startsWith('data:') ? imageData : `data:image/png;base64,${imageData}`;
-  } else {
-    const base64 = uint8ArrayToBase64(imageData);
-    imageSource = `data:image/png;base64,${base64}`;
+function uint8ArrayToBase64(uint8Array: Uint8Array): string {
+  let binary = '';
+  const len = uint8Array.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(uint8Array[i]);
   }
-
-  try {
-    // Create worker with local paths to avoid CSP issues in Figma
-    const worker = await Tesseract.createWorker('eng', 1, {
-      workerPath: './tesseract/worker.min.js',
-      corePath: './tesseract/tesseract-core-simd.wasm.js',
-      langPath: './tesseract',
-      logger: (m) => {
-        if (m.status === 'recognizing text') {
-          onProgress?.({
-            status: 'Recognizing text...',
-            progress: 0.3 + (m.progress * 0.6)
-          });
-        } else if (m.status === 'loading language traineddata') {
-          onProgress?.({ status: 'Loading language data...', progress: 0.2 });
-        } else if (m.status === 'loading tesseract core') {
-          onProgress?.({ status: 'Loading OCR engine...', progress: 0.15 });
-        }
-      }
-    });
-
-    const result = await worker.recognize(imageSource);
-    await worker.terminate();
-
-    const processingTime = Date.now() - startTime;
-
-    onProgress?.({ status: 'Complete', progress: 1.0 });
-
-    return {
-      text: result.data.text.trim(),
-      confidence: result.data.confidence,
-      language: 'eng',
-      processingTime,
-      method: 'tesseract'
-    };
-  } catch (error) {
-    console.error('Tesseract OCR failed:', error);
-    throw new Error(error instanceof Error ? error.message : 'Tesseract OCR failed');
-  }
+  return btoa(binary);
 }
 
 /**
@@ -137,17 +90,17 @@ export async function extractTextWithOpenAI(
   const startTime = Date.now();
 
   if (!settings.apiKey) {
-    throw new Error('OpenAI API key not configured');
+    throw new Error('OpenAI API key not configured. Go to Settings to add your API key.');
   }
 
   if (!settings.enabled) {
-    throw new Error('AI analysis is disabled');
+    throw new Error('AI analysis is disabled. Enable it in Settings to use OCR.');
   }
 
   // Check if model supports vision
   const visionModels = ['gpt-4-vision-preview', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini'];
   if (!visionModels.includes(settings.model)) {
-    throw new Error(`Model ${settings.model} does not support vision. Please select a vision-capable model (gpt-4o, gpt-4-turbo, or gpt-4-vision-preview) in Settings.`);
+    throw new Error(`Model "${settings.model}" does not support vision. Select gpt-4o or gpt-4o-mini in Settings.`);
   }
 
   onProgress?.({ status: 'Converting image...', progress: 0.1 });
@@ -192,8 +145,21 @@ export async function extractTextWithOpenAI(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error?.message || 'OpenAI Vision API request failed');
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage = errorData.error?.message || `HTTP ${response.status}`;
+
+    // Provide helpful error messages
+    if (response.status === 429) {
+      throw new Error('Rate limit exceeded. Please wait a minute and try again, or check your OpenAI billing.');
+    }
+    if (response.status === 401) {
+      throw new Error('Invalid API key. Check your API key in Settings.');
+    }
+    if (response.status === 400 && errorMessage.includes('billing')) {
+      throw new Error('Billing issue. Add a payment method at platform.openai.com/billing.');
+    }
+
+    throw new Error(errorMessage);
   }
 
   onProgress?.({ status: 'Processing response...', progress: 0.8 });
@@ -215,7 +181,7 @@ export async function extractTextWithOpenAI(
 }
 
 /**
- * Extract text from image - tries OpenAI Vision first, falls back to Tesseract
+ * Extract text from image using OpenAI Vision
  */
 export async function extractTextFromImage(
   imageData: string | Uint8Array,
@@ -223,35 +189,21 @@ export async function extractTextFromImage(
   onProgress?: (progress: OCRProgress) => void
 ): Promise<OCRResult> {
   // Check if OpenAI is properly configured
-  const openAIAvailable = settings.enabled &&
-    settings.apiKey &&
-    ['gpt-4-vision-preview', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini'].includes(settings.model);
+  const visionModels = ['gpt-4-vision-preview', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini'];
 
-  if (openAIAvailable) {
-    try {
-      // Try OpenAI Vision first
-      return await extractTextWithOpenAI(imageData, settings, onProgress);
-    } catch (error) {
-      console.warn('OpenAI Vision failed, falling back to Tesseract:', error);
-      onProgress?.({ status: 'OpenAI failed, using local OCR...', progress: 0.1 });
-      // Fall through to Tesseract
-    }
+  if (!settings.enabled) {
+    throw new Error('AI analysis is disabled. Enable it in Settings to use OCR.');
   }
 
-  // Use Tesseract as fallback (or primary if OpenAI not configured)
-  return await extractTextWithTesseract(imageData, onProgress);
-}
-
-/**
- * Convert Uint8Array to base64 string
- */
-function uint8ArrayToBase64(uint8Array: Uint8Array): string {
-  let binary = '';
-  const len = uint8Array.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(uint8Array[i]);
+  if (!settings.apiKey) {
+    throw new Error('OpenAI API key not configured. Go to Settings to add your API key.');
   }
-  return btoa(binary);
+
+  if (!visionModels.includes(settings.model)) {
+    throw new Error(`Model "${settings.model}" does not support vision. Select gpt-4o or gpt-4o-mini in Settings.`);
+  }
+
+  return await extractTextWithOpenAI(imageData, settings, onProgress);
 }
 
 /**
@@ -274,14 +226,14 @@ export function validateImageQuality(
  * Estimate OCR processing time based on image size
  */
 export function estimateProcessingTime(imageBytes: number): number {
-  // Tesseract takes longer than OpenAI for large images
-  if (imageBytes > 1000000) return 10; // > 1MB
-  if (imageBytes > 500000) return 6;   // > 500KB
-  return 4;
+  // OpenAI Vision typically takes 2-5 seconds
+  if (imageBytes > 1000000) return 5; // > 1MB
+  if (imageBytes > 500000) return 4;   // > 500KB
+  return 3;
 }
 
 /**
- * Initialize OCR (pre-load Tesseract if needed)
+ * Initialize OCR
  */
 export async function initializeOCR(
   onProgress?: (progress: OCRProgress) => void
@@ -293,5 +245,5 @@ export async function initializeOCR(
  * Clean up OCR resources
  */
 export async function terminateOCR(): Promise<void> {
-  // Tesseract workers are auto-terminated
+  // No cleanup needed for OpenAI-only OCR
 }
