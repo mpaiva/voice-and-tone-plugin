@@ -7,7 +7,7 @@ import { createComponentsFromAnalysis } from './componentGenerator';
 figma.showUI(__html__, {
   width: 400,
   height: 600,
-  title: 'ClearCopy',
+  title: 'Voice & Tone',
   themeColors: true
 });
 
@@ -225,7 +225,7 @@ function extractAndSendText() {
     const isRecreatedUI = node.name === 'Recreated UI';
 
     if (isPluginCreated || isRecreatedUI) {
-      console.log('[ClearCopy] Skipping analysis of plugin-created container:', node.name);
+      console.log('[Voice & Tone] Skipping analysis of plugin-created container:', node.name);
       return;
     }
   }

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ClearCopy is a Figma plugin that analyzes UI text against voice and tone guidelines to ensure plain language, accessibility, and consistency for users with cognitive disabilities. Features include rule-based analysis, AI-enhanced analysis via OpenAI, AI copywriting (Clear-Co Copy), and OCR text extraction from images.
+Voice & Tone is a Figma plugin that analyzes UI text against voice and tone guidelines to ensure plain language, accessibility, and consistency for users with cognitive disabilities. Features include rule-based analysis, AI-enhanced analysis via OpenAI, AI copywriting (Clear-Co Copy), and OCR text extraction from images.
 
 **Current Status**: Phase 7 complete (OCR analysis).
 
@@ -25,7 +25,7 @@ After rebuilding, close and reopen the plugin in Figma to see changes (no hot re
 
 1. In Figma Desktop: **Plugins** → **Development** → **Import plugin from manifest**
 2. Select `manifest.json` from project root
-3. Run: **Plugins** → **Development** → **ClearCopy**
+3. Run: **Plugins** → **Development** → **Voice & Tone**
 4. Debug: **Plugins** → **Development** → **Open Console**
 
 ## Architecture

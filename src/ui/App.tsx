@@ -507,7 +507,7 @@ function App() {
       <header className="header">
         <div className="header-content">
           <div>
-            <h1>ClearCopy</h1>
+            <h1>Voice & Tone</h1>
             <p className="subtitle">Voice & tone guideline checker</p>
           </div>
           <div className="header-actions">
@@ -881,7 +881,7 @@ function App() {
 
       <footer className="footer">
         <div className="footer-content">
-          <span className="footer-title">ClearCopy</span>
+          <span className="footer-title">Voice & Tone</span>
           <div className="footer-status">
             {apiStatusLoading ? (
               <span className="status-indicator status-checking">

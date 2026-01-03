@@ -1,5 +1,5 @@
 {
-  "name": "ClearCopy",
+  "name": "Voice & Tone",
   "id": "clearcopy-voice-tone-checker",
   "api": "1.0.0",
   "main": "dist/code.js",

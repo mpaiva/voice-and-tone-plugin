@@ -1,4 +1,4 @@
-# ClearCopy - Figma Plugin
+# Voice & Tone - Figma Plugin
 
 A Figma plugin that analyzes UI text against voice and tone guidelines to ensure plain language, accessibility, and consistency for users with cognitive disabilities.
 
@@ -54,7 +54,7 @@ Note: Close and reopen the plugin in Figma after each rebuild to see changes.
 1. Open Figma Desktop App
 2. Go to **Plugins** → **Development** → **Import plugin from manifest**
 3. Navigate to this project folder and select `manifest.json`
-4. Run: **Plugins** → **Development** → **ClearCopy**
+4. Run: **Plugins** → **Development** → **Voice & Tone**
 
 ### Test Examples
 
