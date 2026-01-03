@@ -1,8 +1,8 @@
-// Clear-Co Copy AI copywriting service
+// AI copywriting service
 
 import type { CopywritingRequest, CopywritingResult } from '../analysis/copywritingTypes';
 import type { OpenAISettings } from '../analysis/aiTypes';
-import { DEFAULT_CLEARCOPY_GUIDELINES, VOICE_GUIDELINES_SUMMARY } from '../constants/defaultGuidelines';
+import { DEFAULT_COPYWRITING_GUIDELINES, VOICE_GUIDELINES_SUMMARY } from '../constants/defaultGuidelines';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
@@ -17,7 +17,7 @@ const TOKEN_COSTS = {
 };
 
 /**
- * Generate copy using Clear-Co Copy AI assistant
+ * Generate copy using AI assistant
  */
 export async function generateCopy(
   request: CopywritingRequest,
@@ -94,10 +94,10 @@ export async function generateCopy(
 }
 
 /**
- * Build system prompt with Clear-Co Copy guidelines
+ * Build system prompt with copywriting guidelines
  */
 function buildSystemPrompt(customGuidelines?: string): string {
-  const guidelines = customGuidelines || DEFAULT_CLEARCOPY_GUIDELINES;
+  const guidelines = customGuidelines || DEFAULT_COPYWRITING_GUIDELINES;
 
   return `${guidelines}
 
@@ -120,10 +120,10 @@ ${elementType ? `ELEMENT TYPE: ${elementType}` : ''}
 ${context ? `CONTEXT: ${context}` : ''}
 ${text ? `REFERENCE TEXT: "${text}"` : ''}
 
-Provide concise, clear UI copy that follows ClearCompany voice and tone guidelines.`;
+Provide concise, clear UI copy that follows voice and tone guidelines.`;
 
     case 'rewrite':
-      return `Rewrite this UI copy to better align with ClearCompany voice and tone guidelines.
+      return `Rewrite this UI copy to better align with voice and tone guidelines.
 
 CURRENT TEXT: "${text}"
 ${elementType ? `ELEMENT TYPE: ${elementType}` : ''}

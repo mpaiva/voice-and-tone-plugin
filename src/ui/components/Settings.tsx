@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { OpenAISettings } from '../analysis/aiTypes';
 import { validateApiKey } from '../services/settings';
-import { DEFAULT_CLEARCOPY_GUIDELINES, VOICE_GUIDELINES_SUMMARY } from '../constants/defaultGuidelines';
+import { DEFAULT_COPYWRITING_GUIDELINES, VOICE_GUIDELINES_SUMMARY } from '../constants/defaultGuidelines';
 import { Icon } from './Icon';
 import './Settings.css';
 
@@ -56,7 +56,7 @@ export function Settings({ settings, onSave, onClose }: SettingsProps) {
   };
 
   const loadDefaultCopyGuidelines = () => {
-    setCustomGuidelines(DEFAULT_CLEARCOPY_GUIDELINES + '\n\n' + VOICE_GUIDELINES_SUMMARY);
+    setCustomGuidelines(DEFAULT_COPYWRITING_GUIDELINES + '\n\n' + VOICE_GUIDELINES_SUMMARY);
   };
 
   return (
@@ -174,16 +174,16 @@ export function Settings({ settings, onSave, onClose }: SettingsProps) {
                 checked={enableCopywriting}
                 onChange={(e) => setEnableCopywriting(e.target.checked)}
               />
-              <span>Enable Clear-Co Copy (AI Copywriting)</span>
+              <span>Enable AI copywriting</span>
             </label>
             <p className="setting-help">
-              Generate and rewrite UI copy using ClearCompany voice & tone guidelines
+              Generate and rewrite UI copy using voice & tone guidelines
             </p>
           </div>
 
           <div className="setting-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <label className="setting-label-text">Clear-Co Copy Guidelines</label>
+              <label className="setting-label-text">Copywriting guidelines</label>
               <div className="button-group">
                 {!showCopyGuidelines && !customGuidelines && (
                   <button
@@ -210,14 +210,14 @@ export function Settings({ settings, onSave, onClose }: SettingsProps) {
                 <textarea
                   value={customGuidelines}
                   onChange={(e) => setCustomGuidelines(e.target.value)}
-                  placeholder="Enter Clear-Co Copy guidelines or click 'Load defaults'..."
+                  placeholder="Enter copywriting guidelines or click 'Load defaults'..."
                   className="guidelines-textarea copywriting-guidelines"
                   disabled={!enableCopywriting}
                   rows={15}
                 />
                 <div className="guidelines-footer">
                   <p className="setting-help">
-                    These guidelines define ClearCompany's voice, tone, and copywriting standards for AI-generated content.
+                    These guidelines define voice, tone, and copywriting standards for AI-generated content.
                   </p>
                   <div className="guidelines-actions">
                     <button
@@ -239,8 +239,8 @@ export function Settings({ settings, onSave, onClose }: SettingsProps) {
             {!showCopyGuidelines && (
               <p className="setting-help">
                 {customGuidelines
-                  ? 'Custom Clear-Co Copy guidelines configured'
-                  : 'Click "Load defaults" to use ClearCompany voice & tone guidelines'
+                  ? 'Custom copywriting guidelines configured'
+                  : 'Click "Load defaults" to use voice & tone guidelines'
                 }
               </p>
             )}

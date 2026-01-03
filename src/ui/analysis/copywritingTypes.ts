@@ -1,4 +1,4 @@
-// Copywriting types for Clear-Co Copy integration
+// Copywriting types for AI copywriting feature
 
 export type TaskType =
   | 'new-microcopy'

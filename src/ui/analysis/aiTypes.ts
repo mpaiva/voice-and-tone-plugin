@@ -28,8 +28,8 @@ export interface OpenAISettings {
   model: 'gpt-4' | 'gpt-4-turbo-preview' | 'gpt-3.5-turbo' | 'gpt-4-vision-preview' | 'gpt-4-turbo' | 'gpt-4o';
   enabled: boolean;
   guidelines?: string; // For AI analysis
-  customGuidelines?: string; // For Clear-Co Copy copywriting
-  enableCopywriting?: boolean; // Enable Clear-Co Copy feature
+  customGuidelines?: string; // For AI copywriting
+  enableCopywriting?: boolean; // Enable AI copywriting feature
 }
 
 export interface AIAnalysisRequest {

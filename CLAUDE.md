@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Voice & Tone is a Figma plugin that analyzes UI text against voice and tone guidelines to ensure plain language, accessibility, and consistency for users with cognitive disabilities. Features include rule-based analysis, AI-enhanced analysis via OpenAI, AI copywriting (Clear-Co Copy), and OCR text extraction from images.
+Voice & Tone is a Figma plugin that analyzes UI text against voice and tone guidelines to ensure plain language, accessibility, and consistency for users with cognitive disabilities. Features include rule-based analysis, AI-enhanced analysis via OpenAI, AI copywriting, and OCR text extraction from images.
 
 **Current Status**: Phase 7 complete (OCR analysis).
 
@@ -70,7 +70,7 @@ src/
 │   │   └── elementDetector.ts # UI element type detection
 │   ├── services/
 │   │   ├── openai.ts          # AI analysis integration
-│   │   ├── copywriting.ts     # Clear-Co Copy generation
+│   │   ├── copywriting.ts     # AI copywriting generation
 │   │   ├── ocr.ts             # OpenAI Vision OCR
 │   │   └── settings.ts        # Settings management
 │   ├── components/
@@ -79,7 +79,7 @@ src/
 │   │   ├── OCRInput.tsx
 │   │   └── OCRPreview.tsx
 │   └── constants/
-│       └── defaultGuidelines.ts  # Clear-Co Copy system prompt
+│       └── defaultGuidelines.ts  # AI copywriting system prompt
 ```
 
 ## Message Passing Protocol

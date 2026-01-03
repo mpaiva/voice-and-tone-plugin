@@ -7,7 +7,7 @@ A Figma plugin that analyzes UI text against voice and tone guidelines to ensure
 ### Features
 - **Rule-based analysis** - Readability, sentence length, passive voice, word choice, capitalization, punctuation, button labels, error messages
 - **AI-enhanced analysis** - Deeper analysis via OpenAI integration
-- **Clear-Co Copy** - AI copywriting assistant that generates brand-compliant UI copy
+- **AI copywriting** - AI copywriting assistant that generates brand-compliant UI copy
 - **OCR text extraction** - Analyze text from screenshots and images
 
 ### What's Working

@@ -766,7 +766,7 @@ function App() {
                   {aiAnalysis.issuesFound.length > 0 && settings.customGuidelines && (
                     <div className="copywriting-actions">
                       <h4><Icon name="IconSparkles" size={18} /> Improve This Copy</h4>
-                      <p className="section-description">Generate improved versions using ClearCompany guidelines</p>
+                      <p className="section-description">Generate improved versions using voice & tone guidelines</p>
                       <div className="action-buttons">
                         <button
                           className="btn-copywriting"
